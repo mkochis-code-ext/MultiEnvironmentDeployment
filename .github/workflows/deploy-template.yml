@@ -1,0 +1,45 @@
+name: Multi Environment Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment (dev, test, prod)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  TF_VERSION: '1.6.0'
+
+jobs:
+  plan:
+    name: 'Build - ${{ inputs.environment }}'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Building Code
+        run: echo "Code build for ${{ inputs.environment }} successful"
+
+
+  approve:
+    name: 'Approve - ${{ inputs.environment }}'
+    runs-on: ubuntu-latest
+    needs: plan
+    environment: ${{ inputs.environment }}-approve
+    steps:
+      - name: Approved
+        run: echo "Deployment to ${{ inputs.environment }} approved"
+
+  apply:
+    name: 'Deployment - ${{ inputs.environment }}'
+    runs-on: ubuntu-latest
+    needs: approve
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Approved
+        run: echo "Deployment to ${{ inputs.environment }} Successful"

@@ -1,0 +1,52 @@
+name: CD
+
+# Triggers on merge to main (after PR) or manual dispatch.
+# Deploys sequentially: Dev → Test → Prod.
+# Each environment: Plan runs automatically, Apply requires approval.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GitHub Environments required:
+#
+#   Secrets environments (no protection rules):
+#     dev   – Dev config secrets
+#     test  – Test config secrets
+#     prod  – Prod config secrets
+#
+#   Approval-gate environments (required-reviewer protection, no secrets):
+#     dev-approve
+#     test-approve
+#     prod-approve
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  dev:
+    name: Dev
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  test:
+    name: Test
+    needs: dev
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment: test
+    secrets: inherit
+
+  prod:
+    name: Prod
+    needs: test
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment: prod
+    secrets: inherit

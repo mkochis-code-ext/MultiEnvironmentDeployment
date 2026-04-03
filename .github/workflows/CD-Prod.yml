@@ -1,0 +1,15 @@
+name: CD - Prod
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prod:
+    name: Prod
+    uses: ./.github/workflows/deploy-template.yml
+    with:
+      environment: prod
+    secrets: inherit
